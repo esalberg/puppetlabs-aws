@@ -218,10 +218,12 @@ Puppet::Type.newtype(:ec2_instance) do
       devices = value.is_a?(Array) ? value : [value]
       devices.each do |device|
         fail "block device must be named" unless value.keys.include?('device_name')
-        choices = ['volume_size', 'snapshot_id']
-        fail "block device must include at least one of: " + choices.join(' ') if (value.keys & choices).empty?
-        if value['volume_type'] == 'io1'
-          fail 'must specify iops if using provisioned iops volumes' unless value.keys.include?('iops')
+        if value['virtual_name'] !~ /ephemeral\d+/
+          choices = ['volume_size', 'snapshot_id']
+          fail "block device must include at least one of: " + choices.join(' ') if (value.keys & choices).empty?
+          if value['volume_type'] == 'io1'
+            fail 'must specify iops if using provisioned iops volumes' unless value.keys.include?('iops')
+          end
         end
       end
     end
